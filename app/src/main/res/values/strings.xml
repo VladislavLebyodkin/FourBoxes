@@ -1,3 +1,17 @@
 <resources>
     <string name="app_name">FourBoxes</string>
+
+    <string name="register_email">Емайл</string>
+    <string name="register_email_hint">Введите емайл</string>
+    <string name="register_email_incorrect">Некорректный емайл</string>
+
+    <string name="register_password">Пароль</string>
+    <string name="register_password_hint">Введите пароль</string>
+    <string name="register_password_short">Как минимум 8 символов</string>
+
+    <string name="register_confirm_password">Повторите пароль</string>
+    <string name="register_confirm_password_hint">Повторите пароль</string>
+    <string name="register_confirm_passwords_different">Пароли не совпадают</string>
+
+    <string name="register_submit_button_text">Зарегистрироваться</string>
 </resources>
