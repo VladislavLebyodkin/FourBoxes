@@ -1,20 +1,20 @@
 package com.vladosapps.fourboxes.feature.register.presentation
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
@@ -22,71 +22,98 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.vladosapps.fourboxes.R
+import com.vladosapps.fourboxes.common.presentation.FullScreenLoading
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegisterScreen(
-    viewModel: RegisterViewModel = viewModel()
+    viewModel: RegisterViewModel = hiltViewModel()
 ) {
+    val state by viewModel.state.collectAsState()
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top,
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp)
     ) {
-        EmailField(
-            email = viewModel.email,
-            emailErrorMessageId = viewModel.emailErrorMessageId,
-            validateEmail = { viewModel.validateEmail() }
+        TopAppBar(
+            title = { Text(text = stringResource(id = R.string.register_title), color = colorResource(id = R.color.white)) },
+            modifier = Modifier.fillMaxWidth(),
+
+            navigationIcon = {
+                IconButton(onClick = viewModel::back) {
+                    Icon(Icons.Filled.ArrowBack, null, tint = colorResource(id = R.color.white))
+                }
+            },
+            colors = TopAppBarDefaults.mediumTopAppBarColors(containerColor = colorResource(id = R.color.purple_500))
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .clickable(enabled = !state.isLoading, onClick = {})
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Top,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(24.dp)
+            ) {
+                EmailField(
+                    emailValidation = state.emailValidation,
+                    onEmailChanged = { viewModel.onEmailChanged(it) },
+                )
 
-        PasswordField(
-            password = viewModel.password,
-            passwordErrorMessageId = viewModel.passwordErrorMessageId,
-            validatePassword = { viewModel.validatePassword() }
-        )
+                Spacer(modifier = Modifier.height(16.dp))
 
-        Spacer(modifier = Modifier.height(16.dp))
+                PasswordField(
+                    passwordValidation = state.passwordValidation,
+                    onPasswordChanged = { viewModel.onPasswordChanged(it) },
+                )
 
-        PasswordConfirmField(
-            passwordConfirm = viewModel.passwordConfirm,
-            passwordConfirmErrorMessageId = viewModel.passwordConfirmErrorMessageId,
-            validatePasswordConfirm = { viewModel.validatePasswordConfirm() }
-        )
+                Spacer(modifier = Modifier.height(16.dp))
 
-        Spacer(modifier = Modifier.height(16.dp))
+                PasswordConfirmField(
+                    passwordConfirmValidation = state.passwordConfirmValidation,
+                    onPasswordConfirmChanged = { viewModel.onPasswordConfirmChanged(it) },
+                )
 
-        SubmitButton(
-            isButtonEnabled = viewModel.isSubmitButtonEnabled,
-            submit = { viewModel.submit() }
-        )
+                Spacer(modifier = Modifier.height(16.dp))
+
+                SubmitButton(
+                    isButtonEnabled = state.submitButtonEnabled,
+                    onSubmitClicked = { viewModel.onSubmitClicked() }
+                )
+            }
+        }
     }
+
+    FullScreenLoading(isLoading = state.isLoading)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EmailField(
-    email: MutableState<String>,
-    emailErrorMessageId: MutableState<Int?>,
-    validateEmail: () -> Unit
+    emailValidation: EmailValidation,
+    onEmailChanged: (newValue: String) -> Unit,
 ) {
+    val email = emailValidation.email
+    val errorMessageId = emailValidation.errorMessageId
     OutlinedTextField(
-        value = email.value,
-        onValueChange = {
-            email.value = it
-            validateEmail()
-        },
+        value = email,
+        onValueChange = { onEmailChanged(it) },
         label = { Text(text = stringResource(id = R.string.register_email)) },
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
         placeholder = { Text(text = stringResource(R.string.register_email_hint)) },
+        isError = errorMessageId != null,
         trailingIcon = {
             when {
-                email.value.isNotEmpty() -> IconButton(onClick = {
-                    email.value = ""
+                email.isNotEmpty() -> IconButton(onClick = {
+                    onEmailChanged("")
                 }) {
                     Icon(
                         imageVector = Icons.Filled.Clear,
@@ -95,10 +122,7 @@ fun EmailField(
                 }
             }
         },
-        supportingText = {
-            val errorTextId = emailErrorMessageId.value
-            errorTextId?.let { Text(text = stringResource(id = errorTextId)) }
-        },
+        supportingText = { errorMessageId?.let { Text(text = stringResource(id = errorMessageId)) }},
         singleLine = true,
         modifier = Modifier.fillMaxWidth()
     )
@@ -107,23 +131,22 @@ fun EmailField(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PasswordField(
-    password: MutableState<String>,
-    passwordErrorMessageId: MutableState<Int?>,
-    validatePassword: () -> Unit
+    passwordValidation: PasswordValidation,
+    onPasswordChanged: (newValue: String) -> Unit,
 ) {
+    val password = passwordValidation.password
+    val errorMessageId = passwordValidation.errorMessageId
     val passwordVisible = remember { mutableStateOf(false) }
 
     OutlinedTextField(
-        value = password.value,
-        onValueChange = {
-            password.value = it
-            validatePassword()
-        },
+        value = password,
+        onValueChange = { onPasswordChanged(it) },
         label = { Text(text = stringResource(id = R.string.register_password)) },
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
         placeholder = { Text(text = stringResource(R.string.register_password_hint)) },
+        isError = errorMessageId != null,
         trailingIcon = {
-            if (password.value.isNotEmpty()) {
+            if (password.isNotEmpty()) {
                 val icon = if (passwordVisible.value) {
                     painterResource(id = R.drawable.ic_visibility_on)
                 } else {
@@ -136,10 +159,7 @@ fun PasswordField(
             }
         },
         visualTransformation = if (passwordVisible.value) VisualTransformation.None else PasswordVisualTransformation(),
-        supportingText = {
-            val errorTextId = passwordErrorMessageId.value
-            errorTextId?.let { Text(text = stringResource(id = errorTextId)) }
-        },
+        supportingText = { errorMessageId?.let { Text(text = stringResource(id = errorMessageId)) }},
         singleLine = true,
         modifier = Modifier.fillMaxWidth()
     )
@@ -148,25 +168,24 @@ fun PasswordField(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PasswordConfirmField(
-    passwordConfirm: MutableState<String>,
-    passwordConfirmErrorMessageId: MutableState<Int?>,
-    validatePasswordConfirm: () -> Unit
+    passwordConfirmValidation: PasswordConfirmValidation,
+    onPasswordConfirmChanged: (newValue: String) -> Unit,
 ) {
+    val passwordConfirm = passwordConfirmValidation.passwordConfirm
+    val errorMessageId = passwordConfirmValidation.errorMessageId
     val passwordVisible = remember { mutableStateOf(false) }
     val focusManager = LocalFocusManager.current
 
     OutlinedTextField(
-        value = passwordConfirm.value,
-        onValueChange = {
-            passwordConfirm.value = it
-            validatePasswordConfirm()
-        },
+        value = passwordConfirm,
+        onValueChange = { onPasswordConfirmChanged(it) },
         label = { Text(text = stringResource(id = R.string.register_confirm_password)) },
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
         placeholder = { Text(text = stringResource(R.string.register_confirm_password_hint)) },
         keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+        isError = errorMessageId != null,
         trailingIcon = {
-            if (passwordConfirm.value.isNotEmpty()) {
+            if (passwordConfirm.isNotEmpty()) {
                 val icon = if (passwordVisible.value) {
                     painterResource(id = R.drawable.ic_visibility_on)
                 } else {
@@ -179,10 +198,7 @@ fun PasswordConfirmField(
             }
         },
         visualTransformation = if (passwordVisible.value) VisualTransformation.None else PasswordVisualTransformation(),
-        supportingText = {
-            val errorTextId = passwordConfirmErrorMessageId.value
-            errorTextId?.let { Text(text = stringResource(id = errorTextId)) }
-        },
+        supportingText = { errorMessageId?.let { Text(text = stringResource(id = errorMessageId)) }},
         singleLine = true,
         modifier = Modifier.fillMaxWidth()
     )
@@ -190,13 +206,13 @@ fun PasswordConfirmField(
 
 @Composable
 fun SubmitButton(
-    isButtonEnabled: MutableState<Boolean>,
-    submit: () -> Unit
+    isButtonEnabled: Boolean,
+    onSubmitClicked: () -> Unit
 ) {
     Button(
-        onClick = { submit() },
+        onClick = { onSubmitClicked() },
         shape = RoundedCornerShape(size = 16.dp),
-        enabled = isButtonEnabled.value,
+        enabled = isButtonEnabled,
         modifier = Modifier
             .fillMaxWidth()
             .height(46.dp)

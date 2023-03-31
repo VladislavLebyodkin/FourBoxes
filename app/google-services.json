@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "678264722497",
+    "project_id": "fourboxes-d50f4",
+    "storage_bucket": "fourboxes-d50f4.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:678264722497:android:3b5b01fff010897a1ca2c0",
+        "android_client_info": {
+          "package_name": "com.vladosapps.fourboxes"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "678264722497-b7iug5uir728jom5l6vt516g8u3gvg6u.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA7SHqFLbLiDtX-BuAW8A3rEyhF8hjDyv4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "678264722497-b7iug5uir728jom5l6vt516g8u3gvg6u.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

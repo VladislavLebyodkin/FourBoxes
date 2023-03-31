@@ -13,5 +13,5 @@ import javax.inject.Singleton
 interface NavigationModule {
     @Binds
     @Singleton
-    fun bindNavigator(navigatorImpl: NavigatorImpl): Navigator
+    fun bindNavigator(impl: NavigatorImpl): Navigator
 }

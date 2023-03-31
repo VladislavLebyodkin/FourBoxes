@@ -24,20 +24,16 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             FourBoxesTheme {
-                // A surface container using the 'background' color from the theme
-//                Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colors.background) {
-//
-//                }
-
                 val navController = rememberNavController()
                 DisposableEffect(key1 = navController) {
                     navigator.setController(navController)
-                    onDispose {
-                        navigator.clearController()
-                    }
+                    onDispose { navigator.clearController() }
                 }
 
-                NavHost(navController = navController, startDestination = RegisterRoute.route) {
+                NavHost(
+                    navController = navController,
+                    startDestination = RegisterRoute.route
+                ) {
                     composable(route = RegisterRoute.route) {
                         RegisterScreen()
                     }
