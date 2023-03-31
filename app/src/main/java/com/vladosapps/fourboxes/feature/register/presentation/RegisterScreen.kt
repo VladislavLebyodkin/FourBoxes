@@ -17,6 +17,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -107,7 +108,7 @@ fun EmailField(
         value = email,
         onValueChange = { onEmailChanged(it) },
         label = { Text(text = stringResource(id = R.string.register_email)) },
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next),
         placeholder = { Text(text = stringResource(R.string.register_email_hint)) },
         isError = errorMessageId != null,
         trailingIcon = {
@@ -142,7 +143,7 @@ fun PasswordField(
         value = password,
         onValueChange = { onPasswordChanged(it) },
         label = { Text(text = stringResource(id = R.string.register_password)) },
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Next),
         placeholder = { Text(text = stringResource(R.string.register_password_hint)) },
         isError = errorMessageId != null,
         trailingIcon = {
@@ -180,7 +181,7 @@ fun PasswordConfirmField(
         value = passwordConfirm,
         onValueChange = { onPasswordConfirmChanged(it) },
         label = { Text(text = stringResource(id = R.string.register_confirm_password)) },
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
         placeholder = { Text(text = stringResource(R.string.register_confirm_password_hint)) },
         keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
         isError = errorMessageId != null,
