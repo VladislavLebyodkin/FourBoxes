@@ -13,15 +13,4 @@ class RegisterInteractor @Inject constructor(
             password = password
         )
     }
-
-    suspend fun login(email: String, password: String): Result<FirebaseUser> {
-        return registerRepo.login(
-            email = email,
-            password = password
-        )
-    }
-
-    fun signOut() {
-        registerRepo.signOut()
-    }
 }

@@ -25,6 +25,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.vladosapps.fourboxes.R
+import com.vladosapps.fourboxes.common.model.user.EmailValidation
+import com.vladosapps.fourboxes.common.model.user.PasswordConfirmValidation
+import com.vladosapps.fourboxes.common.model.user.PasswordValidation
 import com.vladosapps.fourboxes.common.presentation.FullScreenLoading
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -89,6 +92,14 @@ fun RegisterScreen(
                     isButtonEnabled = state.submitButtonEnabled,
                     onSubmitClicked = { viewModel.onSubmitClicked() }
                 )
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Text(text = stringResource(id = R.string.register_already_have_account))
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                LoginButton(viewModel::onLoginClicked)
             }
         }
     }
@@ -220,6 +231,22 @@ fun SubmitButton(
     ) {
         Text(
             text = stringResource(id = R.string.register_submit_button_text),
+            fontSize = 16.sp
+        )
+    }
+}
+
+@Composable
+fun LoginButton(onClicked: () -> Unit) {
+    Button(
+        onClick = { onClicked() },
+        shape = RoundedCornerShape(size = 16.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(46.dp)
+    ) {
+        Text(
+            text = stringResource(id = R.string.register_login_button_text),
             fontSize = 16.sp
         )
     }

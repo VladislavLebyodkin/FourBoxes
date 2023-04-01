@@ -1,5 +1,9 @@
 package com.vladosapps.fourboxes.feature.register.presentation
 
+import com.vladosapps.fourboxes.common.model.user.EmailValidation
+import com.vladosapps.fourboxes.common.model.user.PasswordConfirmValidation
+import com.vladosapps.fourboxes.common.model.user.PasswordValidation
+
 data class RegisterState(
     val isLoading: Boolean,
     val emailValidation: EmailValidation,
@@ -13,20 +17,3 @@ data class RegisterState(
                 !isLoading
 }
 
-data class EmailValidation(
-    val email: String,
-    val errorMessageId: Int?,
-    val isValid: Boolean
-)
-
-data class PasswordValidation(
-    val password: String,
-    val errorMessageId: Int?,
-    val isValid: Boolean
-)
-
-data class PasswordConfirmValidation(
-    val passwordConfirm: String,
-    val errorMessageId: Int?,
-    val isValid: Boolean
-)

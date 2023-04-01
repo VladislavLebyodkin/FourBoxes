@@ -4,6 +4,10 @@ import android.util.Patterns
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vladosapps.fourboxes.R
+import com.vladosapps.fourboxes.common.model.user.EmailValidation
+import com.vladosapps.fourboxes.common.model.user.PasswordConfirmValidation
+import com.vladosapps.fourboxes.common.model.user.PasswordValidation
+import com.vladosapps.fourboxes.feature.login.presentation.LoginRoute
 import com.vladosapps.fourboxes.feature.register.domain.RegisterInteractor
 import com.vladosapps.fourboxes.navigation.Navigator
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -64,7 +68,11 @@ class RegisterViewModel @Inject constructor(
                     email = _state.value.emailValidation.email,
                     password = _state.value.passwordValidation.password
                 )
-                    .onSuccess {  }
+                    .onSuccess {
+                        withContext(Dispatchers.Main) {
+                            navigator.navigate(LoginRoute(it.email))
+                        }
+                    }
                     .onFailure {
                         // TODO: handle errors | bottom sheet dialog
                     }
@@ -76,6 +84,10 @@ class RegisterViewModel @Inject constructor(
 
     fun back() {
         navigator.popBackStack()
+    }
+
+    fun onLoginClicked() {
+        navigator.navigate(LoginRoute())
     }
 
     private fun validateEmail() {
