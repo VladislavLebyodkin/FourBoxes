@@ -24,6 +24,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.vladosapps.fourboxes.R
 import com.vladosapps.fourboxes.common.model.user.EmailValidation
 import com.vladosapps.fourboxes.common.model.user.PasswordConfirmValidation
@@ -35,7 +36,7 @@ import com.vladosapps.fourboxes.common.presentation.FullScreenLoading
 fun RegisterScreen(
     viewModel: RegisterViewModel = hiltViewModel()
 ) {
-    val state by viewModel.state.collectAsState()
+    val state by viewModel.state.collectAsStateWithLifecycle()
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -89,7 +90,7 @@ fun RegisterScreen(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 SubmitButton(
-                    isButtonEnabled = state.submitButtonEnabled,
+                    isButtonEnabled = state.isSubmitButtonEnabled,
                     onSubmitClicked = { viewModel.onSubmitClicked() }
                 )
 
@@ -118,9 +119,9 @@ fun EmailField(
     OutlinedTextField(
         value = email,
         onValueChange = { onEmailChanged(it) },
-        label = { Text(text = stringResource(id = R.string.register_email)) },
+        label = { Text(text = stringResource(id = R.string.common_email)) },
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next),
-        placeholder = { Text(text = stringResource(R.string.register_email_hint)) },
+        placeholder = { Text(text = stringResource(R.string.common_email_hint)) },
         isError = errorMessageId != null,
         trailingIcon = {
             when {
@@ -153,9 +154,9 @@ fun PasswordField(
     OutlinedTextField(
         value = password,
         onValueChange = { onPasswordChanged(it) },
-        label = { Text(text = stringResource(id = R.string.register_password)) },
+        label = { Text(text = stringResource(id = R.string.common_password)) },
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Next),
-        placeholder = { Text(text = stringResource(R.string.register_password_hint)) },
+        placeholder = { Text(text = stringResource(R.string.common_password_hint)) },
         isError = errorMessageId != null,
         trailingIcon = {
             if (password.isNotEmpty()) {

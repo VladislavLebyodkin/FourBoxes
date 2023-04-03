@@ -40,7 +40,7 @@ class MainActivity : ComponentActivity() {
                     composable(route = RegisterRoute.route) {
                         RegisterScreen()
                     }
-                    composable(route = LoginRoute.route) {
+                    composable(route = LoginRoute.route, arguments = LoginRoute.navArgs) {
                         LoginScreen()
                     }
                 }

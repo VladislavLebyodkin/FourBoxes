@@ -10,7 +10,7 @@ data class RegisterState(
     val passwordValidation: PasswordValidation,
     val passwordConfirmValidation: PasswordConfirmValidation,
 ) {
-    val submitButtonEnabled: Boolean
+    val isSubmitButtonEnabled: Boolean
         get() = emailValidation.isValid &&
                 passwordValidation.isValid &&
                 passwordConfirmValidation.isValid &&

@@ -62,23 +62,21 @@ class RegisterViewModel @Inject constructor(
 
     fun onSubmitClicked() {
         _state.update { it.copy(isLoading = true) }
-        viewModelScope.launch {
-            withContext(Dispatchers.IO) {
-                interactor.createUserWithEmailAndPassword(
-                    email = _state.value.emailValidation.email,
-                    password = _state.value.passwordValidation.password
-                )
-                    .onSuccess {
-                        withContext(Dispatchers.Main) {
-                            navigator.navigate(LoginRoute(it.email))
-                        }
+        viewModelScope.launch(Dispatchers.IO) {
+            interactor.createUserWithEmailAndPassword(
+                email = _state.value.emailValidation.email,
+                password = _state.value.passwordValidation.password
+            )
+                .onSuccess {
+                    withContext(Dispatchers.Main) {
+                        navigator.navigate(LoginRoute(email = it.email!!))
                     }
-                    .onFailure {
-                        // TODO: handle errors | bottom sheet dialog
-                    }
+                }
+                .onFailure {
+                    // TODO: handle errors | bottom sheet dialog
+                }
 
-                _state.update { it.copy(isLoading = false) }
-            }
+            _state.update { it.copy(isLoading = false) }
         }
     }
 
@@ -104,7 +102,7 @@ class RegisterViewModel @Inject constructor(
             _state.update {
                 val emailValidation = it.emailValidation.copy(
                     isValid = false,
-                    errorMessageId = R.string.register_email_incorrect
+                    errorMessageId = R.string.common_email_incorrect
                 )
                 it.copy(emailValidation = emailValidation)
             }
@@ -117,7 +115,7 @@ class RegisterViewModel @Inject constructor(
             _state.update {
                 val passwordValidation = it.passwordValidation.copy(
                     isValid = false,
-                    errorMessageId = R.string.register_password_short
+                    errorMessageId = R.string.common_password_short
                 )
                 it.copy(passwordValidation = passwordValidation)
             }
