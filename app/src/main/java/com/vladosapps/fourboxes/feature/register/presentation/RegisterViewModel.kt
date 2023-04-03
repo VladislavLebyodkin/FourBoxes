@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vladosapps.fourboxes.R
 import com.vladosapps.fourboxes.common.model.user.EmailValidation
-import com.vladosapps.fourboxes.common.model.user.PasswordConfirmValidation
 import com.vladosapps.fourboxes.common.model.user.PasswordValidation
 import com.vladosapps.fourboxes.feature.login.presentation.LoginRoute
 import com.vladosapps.fourboxes.feature.register.domain.RegisterInteractor
@@ -30,7 +29,7 @@ class RegisterViewModel @Inject constructor(
             isLoading = false,
             emailValidation = EmailValidation("", null, false),
             passwordValidation = PasswordValidation("", null, false),
-            passwordConfirmValidation = PasswordConfirmValidation("", null, false),
+            passwordConfirmValidation = PasswordValidation("", null, false),
         )
     )
 
@@ -54,7 +53,7 @@ class RegisterViewModel @Inject constructor(
 
     fun onPasswordConfirmChanged(newValue: String) {
         _state.update { state ->
-            val passwordConfirmValidation = state.passwordConfirmValidation.copy(passwordConfirm = newValue)
+            val passwordConfirmValidation = state.passwordConfirmValidation.copy(password = newValue)
             state.copy(passwordConfirmValidation = passwordConfirmValidation)
         }
         validatePasswordConfirm()
@@ -132,7 +131,7 @@ class RegisterViewModel @Inject constructor(
 
     private fun validatePasswordConfirm() {
         val pass = _state.value.passwordValidation.password
-        val passConfirm = _state.value.passwordConfirmValidation.passwordConfirm
+        val passConfirm = _state.value.passwordConfirmValidation.password
 
         if (!pass.contentEquals(passConfirm)) {
             _state.update {

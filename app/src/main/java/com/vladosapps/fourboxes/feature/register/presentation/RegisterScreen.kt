@@ -3,33 +3,23 @@ package com.vladosapps.fourboxes.feature.register.presentation
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.vladosapps.fourboxes.R
-import com.vladosapps.fourboxes.common.model.user.EmailValidation
-import com.vladosapps.fourboxes.common.model.user.PasswordConfirmValidation
-import com.vladosapps.fourboxes.common.model.user.PasswordValidation
+import com.vladosapps.fourboxes.common.presentation.EmailField
 import com.vladosapps.fourboxes.common.presentation.FullScreenLoading
+import com.vladosapps.fourboxes.common.presentation.PasswordField
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -82,9 +72,9 @@ fun RegisterScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                PasswordConfirmField(
-                    passwordConfirmValidation = state.passwordConfirmValidation,
-                    onPasswordConfirmChanged = { viewModel.onPasswordConfirmChanged(it) },
+                PasswordField(
+                    passwordValidation = state.passwordConfirmValidation,
+                    onPasswordChanged = { viewModel.onPasswordConfirmChanged(it) },
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -106,115 +96,6 @@ fun RegisterScreen(
     }
 
     FullScreenLoading(isLoading = state.isLoading)
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun EmailField(
-    emailValidation: EmailValidation,
-    onEmailChanged: (newValue: String) -> Unit,
-) {
-    val email = emailValidation.email
-    val errorMessageId = emailValidation.errorMessageId
-    OutlinedTextField(
-        value = email,
-        onValueChange = { onEmailChanged(it) },
-        label = { Text(text = stringResource(id = R.string.common_email)) },
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next),
-        placeholder = { Text(text = stringResource(R.string.common_email_hint)) },
-        isError = errorMessageId != null,
-        trailingIcon = {
-            when {
-                email.isNotEmpty() -> IconButton(onClick = {
-                    onEmailChanged("")
-                }) {
-                    Icon(
-                        imageVector = Icons.Filled.Clear,
-                        contentDescription = null
-                    )
-                }
-            }
-        },
-        supportingText = { errorMessageId?.let { Text(text = stringResource(id = errorMessageId)) }},
-        singleLine = true,
-        modifier = Modifier.fillMaxWidth()
-    )
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun PasswordField(
-    passwordValidation: PasswordValidation,
-    onPasswordChanged: (newValue: String) -> Unit,
-) {
-    val password = passwordValidation.password
-    val errorMessageId = passwordValidation.errorMessageId
-    val passwordVisible = remember { mutableStateOf(false) }
-
-    OutlinedTextField(
-        value = password,
-        onValueChange = { onPasswordChanged(it) },
-        label = { Text(text = stringResource(id = R.string.common_password)) },
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Next),
-        placeholder = { Text(text = stringResource(R.string.common_password_hint)) },
-        isError = errorMessageId != null,
-        trailingIcon = {
-            if (password.isNotEmpty()) {
-                val icon = if (passwordVisible.value) {
-                    painterResource(id = R.drawable.ic_visibility_on)
-                } else {
-                    painterResource(id = R.drawable.ic_visibility_off)
-                }
-
-                IconButton(onClick = { passwordVisible.value = !passwordVisible.value }) {
-                    Icon(painter = icon, null)
-                }
-            }
-        },
-        visualTransformation = if (passwordVisible.value) VisualTransformation.None else PasswordVisualTransformation(),
-        supportingText = { errorMessageId?.let { Text(text = stringResource(id = errorMessageId)) }},
-        singleLine = true,
-        modifier = Modifier.fillMaxWidth()
-    )
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun PasswordConfirmField(
-    passwordConfirmValidation: PasswordConfirmValidation,
-    onPasswordConfirmChanged: (newValue: String) -> Unit,
-) {
-    val passwordConfirm = passwordConfirmValidation.passwordConfirm
-    val errorMessageId = passwordConfirmValidation.errorMessageId
-    val passwordVisible = remember { mutableStateOf(false) }
-    val focusManager = LocalFocusManager.current
-
-    OutlinedTextField(
-        value = passwordConfirm,
-        onValueChange = { onPasswordConfirmChanged(it) },
-        label = { Text(text = stringResource(id = R.string.register_confirm_password)) },
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
-        placeholder = { Text(text = stringResource(R.string.register_confirm_password_hint)) },
-        keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-        isError = errorMessageId != null,
-        trailingIcon = {
-            if (passwordConfirm.isNotEmpty()) {
-                val icon = if (passwordVisible.value) {
-                    painterResource(id = R.drawable.ic_visibility_on)
-                } else {
-                    painterResource(id = R.drawable.ic_visibility_off)
-                }
-
-                IconButton(onClick = { passwordVisible.value = !passwordVisible.value }) {
-                    Icon(painter = icon, null)
-                }
-            }
-        },
-        visualTransformation = if (passwordVisible.value) VisualTransformation.None else PasswordVisualTransformation(),
-        supportingText = { errorMessageId?.let { Text(text = stringResource(id = errorMessageId)) }},
-        singleLine = true,
-        modifier = Modifier.fillMaxWidth()
-    )
 }
 
 @Composable

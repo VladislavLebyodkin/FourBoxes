@@ -1,14 +1,13 @@
 package com.vladosapps.fourboxes.feature.register.presentation
 
 import com.vladosapps.fourboxes.common.model.user.EmailValidation
-import com.vladosapps.fourboxes.common.model.user.PasswordConfirmValidation
 import com.vladosapps.fourboxes.common.model.user.PasswordValidation
 
 data class RegisterState(
     val isLoading: Boolean,
     val emailValidation: EmailValidation,
     val passwordValidation: PasswordValidation,
-    val passwordConfirmValidation: PasswordConfirmValidation,
+    val passwordConfirmValidation: PasswordValidation,
 ) {
     val isSubmitButtonEnabled: Boolean
         get() = emailValidation.isValid &&
