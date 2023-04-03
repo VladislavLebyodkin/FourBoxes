@@ -1,40 +1,61 @@
-package com.vladosapps.fourboxes.feature.register.presentation
+package com.vladosapps.fourboxes.feature.login.presentation
 
 import android.util.Patterns
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vladosapps.fourboxes.R
 import com.vladosapps.fourboxes.common.model.user.EmailValidation
-import com.vladosapps.fourboxes.common.model.user.PasswordConfirmValidation
 import com.vladosapps.fourboxes.common.model.user.PasswordValidation
-import com.vladosapps.fourboxes.feature.login.presentation.LoginRoute
-import com.vladosapps.fourboxes.feature.register.domain.RegisterInteractor
+import com.vladosapps.fourboxes.feature.login.domain.LoginInteractor
+import com.vladosapps.fourboxes.feature.register.presentation.RegisterRoute
 import com.vladosapps.fourboxes.navigation.Navigator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
-class RegisterViewModel @Inject constructor(
-    private val interactor: RegisterInteractor,
-    private val navigator: Navigator,
+class LoginViewModel @Inject constructor(
+    savedStateHandle: SavedStateHandle,
+    private val interactor: LoginInteractor,
+    private val navigator: Navigator
 ) : ViewModel() {
 
+    private val route = LoginRoute(savedStateHandle)
+
     private val _state = MutableStateFlow(
-        RegisterState(
+        LoginState(
             isLoading = false,
-            emailValidation = EmailValidation("", null, false),
+            emailValidation = EmailValidation(
+                email = if (route.email != LoginRoute.NO_EMAIL) route.email else "",
+                errorMessageId = null,
+                isValid = route.email != LoginRoute.NO_EMAIL
+            ),
             passwordValidation = PasswordValidation("", null, false),
-            passwordConfirmValidation = PasswordConfirmValidation("", null, false),
         )
     )
 
-    val state = _state.asStateFlow()
+    val state: StateFlow<LoginState> = _state.asStateFlow()
+
+    fun onSubmitClicked() {
+        _state.update { it.copy(isLoading = true) }
+
+        viewModelScope.launch(Dispatchers.IO) {
+            interactor.loginWithEmailAndPassword(
+                email = _state.value.emailValidation.email,
+                password = _state.value.passwordValidation.password
+            )
+                .onSuccess { }
+                .onFailure { }
+
+            _state.update { it.copy(isLoading = false) }
+        }
+    }
 
     fun onEmailChanged(newValue: String) {
         _state.update { state ->
@@ -52,40 +73,12 @@ class RegisterViewModel @Inject constructor(
         validatePassword()
     }
 
-    fun onPasswordConfirmChanged(newValue: String) {
-        _state.update { state ->
-            val passwordConfirmValidation = state.passwordConfirmValidation.copy(passwordConfirm = newValue)
-            state.copy(passwordConfirmValidation = passwordConfirmValidation)
-        }
-        validatePasswordConfirm()
-    }
-
-    fun onSubmitClicked() {
-        _state.update { it.copy(isLoading = true) }
-        viewModelScope.launch(Dispatchers.IO) {
-            interactor.createUserWithEmailAndPassword(
-                email = _state.value.emailValidation.email,
-                password = _state.value.passwordValidation.password
-            )
-                .onSuccess {
-                    withContext(Dispatchers.Main) {
-                        navigator.navigate(LoginRoute(email = it.email!!))
-                    }
-                }
-                .onFailure {
-                    // TODO: handle errors | bottom sheet dialog
-                }
-
-            _state.update { it.copy(isLoading = false) }
-        }
-    }
-
     fun back() {
         navigator.popBackStack()
     }
 
-    fun onLoginClicked() {
-        navigator.navigate(LoginRoute())
+    fun onRegisterClicked() {
+        navigator.navigate(RegisterRoute)
     }
 
     private fun validateEmail() {
@@ -126,29 +119,6 @@ class RegisterViewModel @Inject constructor(
                     errorMessageId = null
                 )
                 it.copy(passwordValidation = passwordValidation)
-            }
-        }
-    }
-
-    private fun validatePasswordConfirm() {
-        val pass = _state.value.passwordValidation.password
-        val passConfirm = _state.value.passwordConfirmValidation.passwordConfirm
-
-        if (!pass.contentEquals(passConfirm)) {
-            _state.update {
-                val passwordConfirmValidation = it.passwordConfirmValidation.copy(
-                    isValid = false,
-                    errorMessageId = R.string.register_confirm_passwords_different
-                )
-                it.copy(passwordConfirmValidation = passwordConfirmValidation)
-            }
-        } else {
-            _state.update {
-                val passwordConfirmValidation = it.passwordConfirmValidation.copy(
-                    isValid = true,
-                    errorMessageId = null
-                )
-                it.copy(passwordConfirmValidation = passwordConfirmValidation)
             }
         }
     }

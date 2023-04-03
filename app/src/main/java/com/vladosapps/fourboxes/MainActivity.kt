@@ -7,6 +7,8 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.vladosapps.fourboxes.feature.login.presentation.LoginRoute
+import com.vladosapps.fourboxes.feature.login.presentation.LoginScreen
 import com.vladosapps.fourboxes.feature.register.presentation.RegisterRoute
 import com.vladosapps.fourboxes.feature.register.presentation.RegisterScreen
 import com.vladosapps.fourboxes.navigation.Navigator
@@ -33,9 +35,13 @@ class MainActivity : ComponentActivity() {
                 NavHost(
                     navController = navController,
                     startDestination = RegisterRoute.route
+//                    startDestination = LoginRoute.route
                 ) {
                     composable(route = RegisterRoute.route) {
                         RegisterScreen()
+                    }
+                    composable(route = LoginRoute.route, arguments = LoginRoute.navArgs) {
+                        LoginScreen()
                     }
                 }
             }

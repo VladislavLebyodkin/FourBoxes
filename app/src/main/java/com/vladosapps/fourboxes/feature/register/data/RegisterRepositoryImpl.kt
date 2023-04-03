@@ -18,17 +18,4 @@ class RegisterRepositoryImpl @Inject constructor(
             Result.failure(e)
         }
     }
-
-    override suspend fun login(email: String, password: String): Result<FirebaseUser> {
-        return try {
-            val result = auth.signInWithEmailAndPassword(email, password).await()
-            Result.success(result.user!!)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
-    override fun signOut() {
-        auth.signOut()
-    }
 }

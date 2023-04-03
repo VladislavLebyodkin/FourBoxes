@@ -1,11 +1,9 @@
-package com.vladosapps.fourboxes.feature.register.presentation
+package com.vladosapps.fourboxes.feature.login.presentation
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
@@ -13,7 +11,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -27,14 +24,13 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.vladosapps.fourboxes.R
 import com.vladosapps.fourboxes.common.model.user.EmailValidation
-import com.vladosapps.fourboxes.common.model.user.PasswordConfirmValidation
 import com.vladosapps.fourboxes.common.model.user.PasswordValidation
 import com.vladosapps.fourboxes.common.presentation.FullScreenLoading
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RegisterScreen(
-    viewModel: RegisterViewModel = hiltViewModel()
+fun LoginScreen(
+    viewModel: LoginViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
@@ -45,7 +41,7 @@ fun RegisterScreen(
             .fillMaxSize()
     ) {
         TopAppBar(
-            title = { Text(text = stringResource(id = R.string.register_title), color = colorResource(id = R.color.white)) },
+            title = { Text(text = stringResource(id = R.string.login_title), color = colorResource(id = R.color.white)) },
             modifier = Modifier.fillMaxWidth(),
 
             navigationIcon = {
@@ -82,13 +78,6 @@ fun RegisterScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                PasswordConfirmField(
-                    passwordConfirmValidation = state.passwordConfirmValidation,
-                    onPasswordConfirmChanged = { viewModel.onPasswordConfirmChanged(it) },
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
                 SubmitButton(
                     isButtonEnabled = state.isSubmitButtonEnabled,
                     onSubmitClicked = { viewModel.onSubmitClicked() }
@@ -96,11 +85,11 @@ fun RegisterScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                Text(text = stringResource(id = R.string.register_already_have_account))
+                Text(text = stringResource(id = R.string.login_have_no_account))
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                LoginButton(viewModel::onLoginClicked)
+                RegisterButton(viewModel::onRegisterClicked)
             }
         }
     }
@@ -178,45 +167,6 @@ fun PasswordField(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun PasswordConfirmField(
-    passwordConfirmValidation: PasswordConfirmValidation,
-    onPasswordConfirmChanged: (newValue: String) -> Unit,
-) {
-    val passwordConfirm = passwordConfirmValidation.passwordConfirm
-    val errorMessageId = passwordConfirmValidation.errorMessageId
-    val passwordVisible = remember { mutableStateOf(false) }
-    val focusManager = LocalFocusManager.current
-
-    OutlinedTextField(
-        value = passwordConfirm,
-        onValueChange = { onPasswordConfirmChanged(it) },
-        label = { Text(text = stringResource(id = R.string.register_confirm_password)) },
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
-        placeholder = { Text(text = stringResource(R.string.register_confirm_password_hint)) },
-        keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-        isError = errorMessageId != null,
-        trailingIcon = {
-            if (passwordConfirm.isNotEmpty()) {
-                val icon = if (passwordVisible.value) {
-                    painterResource(id = R.drawable.ic_visibility_on)
-                } else {
-                    painterResource(id = R.drawable.ic_visibility_off)
-                }
-
-                IconButton(onClick = { passwordVisible.value = !passwordVisible.value }) {
-                    Icon(painter = icon, null)
-                }
-            }
-        },
-        visualTransformation = if (passwordVisible.value) VisualTransformation.None else PasswordVisualTransformation(),
-        supportingText = { errorMessageId?.let { Text(text = stringResource(id = errorMessageId)) }},
-        singleLine = true,
-        modifier = Modifier.fillMaxWidth()
-    )
-}
-
 @Composable
 fun SubmitButton(
     isButtonEnabled: Boolean,
@@ -231,14 +181,14 @@ fun SubmitButton(
             .height(46.dp)
     ) {
         Text(
-            text = stringResource(id = R.string.register_submit_button_text),
+            text = stringResource(id = R.string.login_submit_button_text),
             fontSize = 16.sp
         )
     }
 }
 
 @Composable
-fun LoginButton(onClicked: () -> Unit) {
+fun RegisterButton(onClicked: () -> Unit) {
     Button(
         onClick = { onClicked() },
         shape = RoundedCornerShape(size = 16.dp),
@@ -247,7 +197,7 @@ fun LoginButton(onClicked: () -> Unit) {
             .height(46.dp)
     ) {
         Text(
-            text = stringResource(id = R.string.register_login_button_text),
+            text = stringResource(id = R.string.login_register_button_text),
             fontSize = 16.sp
         )
     }
