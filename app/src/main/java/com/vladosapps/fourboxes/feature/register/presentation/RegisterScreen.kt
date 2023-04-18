@@ -4,6 +4,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
+import androidx.compose.material.Button
+import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
@@ -26,9 +28,11 @@ import com.vladosapps.fourboxes.common.presentation.PasswordField
 fun RegisterScreen(
     viewModel: RegisterViewModel = hiltViewModel()
 ) {
-    val state by viewModel.state.collectAsStateWithLifecycle()
+    val state by viewModel.viewState.collectAsStateWithLifecycle()
 
-    Column(
+    Test(viewModel)
+
+/*    Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top,
         modifier = Modifier
@@ -93,9 +97,121 @@ fun RegisterScreen(
                 LoginButton(viewModel::onLoginClicked)
             }
         }
+    }*/
+//    FullScreenLoading(isLoading = state.isLoading)
+}
+
+
+@OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
+@Composable
+fun Test(viewModel: RegisterViewModel) {
+    val scaffoldState = rememberScaffoldState()
+    val bottomState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
+
+    val state by viewModel.viewState.collectAsStateWithLifecycle()
+
+    val errorState = viewModel.errorState.collectAsStateWithLifecycle(null)
+
+    LaunchedEffect(key1 = errorState.value) {
+        if (errorState.value == null) {
+            bottomState.hide()
+        } else {
+            bottomState.show()
+        }
     }
 
-    FullScreenLoading(isLoading = state.isLoading)
+    ModalBottomSheetLayout(
+        sheetState = bottomState,
+        sheetContent = {
+            Text(
+                text = "Just some text\n\n\n\n\n\n\nSome text",
+                Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp)
+            )
+        }
+    ) {
+        Scaffold(
+            scaffoldState = scaffoldState,
+            topBar = {
+                TopAppBar(
+                    title = {
+                        Text(
+                            text = stringResource(id = R.string.register_title),
+                            color = colorResource(id = R.color.white)
+                        )
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+
+                    navigationIcon = {
+                        IconButton(onClick = viewModel::back) {
+                            Icon(Icons.Filled.ArrowBack, null, tint = colorResource(id = R.color.white))
+                        }
+                    },
+                    colors = TopAppBarDefaults.mediumTopAppBarColors(containerColor = colorResource(id = R.color.purple_500))
+                )
+            },
+            content = { padding ->
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Top,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(padding)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clickable(enabled = !state.isLoading, onClick = {})
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Top,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(24.dp)
+                        ) {
+                            EmailField(
+                                emailValidation = state.emailValidation,
+                                onEmailChanged = { viewModel.onEmailChanged(it) },
+                            )
+
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            PasswordField(
+                                passwordValidation = state.passwordValidation,
+                                onPasswordChanged = { viewModel.onPasswordChanged(it) },
+                            )
+
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            PasswordField(
+                                passwordValidation = state.passwordConfirmValidation,
+                                onPasswordChanged = { viewModel.onPasswordConfirmChanged(it) },
+                            )
+
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            SubmitButton(
+                                isButtonEnabled = state.isSubmitButtonEnabled,
+                                onSubmitClicked = { viewModel.onSubmitClicked() }
+                            )
+
+                            Spacer(modifier = Modifier.height(24.dp))
+
+                            Text(text = stringResource(id = R.string.register_already_have_account))
+
+                            Spacer(modifier = Modifier.height(24.dp))
+
+                            LoginButton(viewModel::onLoginClicked)
+                        }
+                    }
+                }
+
+                FullScreenLoading(isLoading = state.isLoading)
+            }
+        )
+    }
 }
 
 @Composable

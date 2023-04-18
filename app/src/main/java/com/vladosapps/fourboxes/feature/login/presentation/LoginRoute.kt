@@ -28,7 +28,6 @@ data class LoginRoute(
             }
         )
 
-//        TODO избавиться от этого, сделать nullable передаваемый параметр
         const val NO_EMAIL = "no_email"
     }
 }

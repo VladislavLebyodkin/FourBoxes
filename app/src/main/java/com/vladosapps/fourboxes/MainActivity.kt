@@ -35,7 +35,6 @@ class MainActivity : ComponentActivity() {
                 NavHost(
                     navController = navController,
                     startDestination = RegisterRoute.route
-//                    startDestination = LoginRoute.route
                 ) {
                     composable(route = RegisterRoute.route) {
                         RegisterScreen()

@@ -1,19 +1,17 @@
 package com.vladosapps.fourboxes.feature.register.presentation
 
 import android.util.Patterns
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vladosapps.fourboxes.R
+import com.vladosapps.fourboxes.common.model.error.FirebaseError
 import com.vladosapps.fourboxes.common.model.user.EmailValidation
 import com.vladosapps.fourboxes.common.model.user.PasswordValidation
+import com.vladosapps.fourboxes.core.BaseViewModel
 import com.vladosapps.fourboxes.feature.login.presentation.LoginRoute
 import com.vladosapps.fourboxes.feature.register.domain.RegisterInteractor
 import com.vladosapps.fourboxes.navigation.Navigator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -22,21 +20,26 @@ import javax.inject.Inject
 class RegisterViewModel @Inject constructor(
     private val interactor: RegisterInteractor,
     private val navigator: Navigator,
-) : ViewModel() {
+) : BaseViewModel<RegisterState>() {
 
-    private val _state = MutableStateFlow(
-        RegisterState(
+//    TODO check state update
+    override fun createInitialState(): RegisterState {
+//        return RegisterState(
+//            isLoading = false,
+//            emailValidation = EmailValidation("ff@ff.ff", null, true),
+//            passwordValidation = PasswordValidation("ffffffff", null, true),
+//            passwordConfirmValidation = PasswordValidation("ffffffff", null, true),
+//        )
+        return RegisterState(
             isLoading = false,
             emailValidation = EmailValidation("", null, false),
             passwordValidation = PasswordValidation("", null, false),
             passwordConfirmValidation = PasswordValidation("", null, false),
         )
-    )
-
-    val state = _state.asStateFlow()
+    }
 
     fun onEmailChanged(newValue: String) {
-        _state.update { state ->
+        updateState { state ->
             val emailValidation = state.emailValidation.copy(email = newValue)
             state.copy(emailValidation = emailValidation)
         }
@@ -44,7 +47,7 @@ class RegisterViewModel @Inject constructor(
     }
 
     fun onPasswordChanged(newValue: String) {
-        _state.update { state ->
+        updateState { state ->
             val passwordValidation = state.passwordValidation.copy(password = newValue)
             state.copy(passwordValidation = passwordValidation)
         }
@@ -52,7 +55,7 @@ class RegisterViewModel @Inject constructor(
     }
 
     fun onPasswordConfirmChanged(newValue: String) {
-        _state.update { state ->
+        updateState { state ->
             val passwordConfirmValidation = state.passwordConfirmValidation.copy(password = newValue)
             state.copy(passwordConfirmValidation = passwordConfirmValidation)
         }
@@ -60,22 +63,20 @@ class RegisterViewModel @Inject constructor(
     }
 
     fun onSubmitClicked() {
-        _state.update { it.copy(isLoading = true) }
+        updateState { it.copy(isLoading = true) }
         viewModelScope.launch(Dispatchers.IO) {
             interactor.createUserWithEmailAndPassword(
-                email = _state.value.emailValidation.email,
-                password = _state.value.passwordValidation.password
+                email = currentState.emailValidation.email,
+                password = currentState.passwordValidation.password
             )
                 .onSuccess {
                     withContext(Dispatchers.Main) {
                         navigator.navigate(LoginRoute(email = it.email!!))
                     }
                 }
-                .onFailure {
-                    // TODO: handle errors | bottom sheet dialog
-                }
+                .onFailure { error -> setError(error = FirebaseError(error.localizedMessage)) }
 
-            _state.update { it.copy(isLoading = false) }
+            updateState { it.copy(isLoading = false) }
         }
     }
 
@@ -88,66 +89,66 @@ class RegisterViewModel @Inject constructor(
     }
 
     private fun validateEmail() {
-        val email = _state.value.emailValidation.email
+        val email = currentState.emailValidation.email
         if (Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            _state.update {
-                val emailValidation = it.emailValidation.copy(
+            updateState { state ->
+                val emailValidation = state.emailValidation.copy(
                     isValid = true,
                     errorMessageId = null
                 )
-                it.copy(emailValidation = emailValidation)
+                state.copy(emailValidation = emailValidation)
             }
         } else {
-            _state.update {
-                val emailValidation = it.emailValidation.copy(
+            updateState { state ->
+                val emailValidation = state.emailValidation.copy(
                     isValid = false,
                     errorMessageId = R.string.common_email_incorrect
                 )
-                it.copy(emailValidation = emailValidation)
+                state.copy(emailValidation = emailValidation)
             }
         }
     }
 
     private fun validatePassword() {
-        val pass = _state.value.passwordValidation.password
+        val pass = currentState.passwordValidation.password
         if (pass.length < 8) {
-            _state.update {
-                val passwordValidation = it.passwordValidation.copy(
+            updateState { state ->
+                val passwordValidation = state.passwordValidation.copy(
                     isValid = false,
                     errorMessageId = R.string.common_password_short
                 )
-                it.copy(passwordValidation = passwordValidation)
+                state.copy(passwordValidation = passwordValidation)
             }
         } else {
-            _state.update {
-                val passwordValidation = it.passwordValidation.copy(
+            updateState { state ->
+                val passwordValidation = state.passwordValidation.copy(
                     isValid = true,
                     errorMessageId = null
                 )
-                it.copy(passwordValidation = passwordValidation)
+                state.copy(passwordValidation = passwordValidation)
             }
         }
     }
 
     private fun validatePasswordConfirm() {
-        val pass = _state.value.passwordValidation.password
-        val passConfirm = _state.value.passwordConfirmValidation.password
+        val pass = currentState.passwordValidation.password
+        val passConfirm = currentState.passwordConfirmValidation.password
 
         if (!pass.contentEquals(passConfirm)) {
-            _state.update {
-                val passwordConfirmValidation = it.passwordConfirmValidation.copy(
+            updateState {state ->
+                val passwordConfirmValidation = state.passwordConfirmValidation.copy(
                     isValid = false,
                     errorMessageId = R.string.register_confirm_passwords_different
                 )
-                it.copy(passwordConfirmValidation = passwordConfirmValidation)
+                state.copy(passwordConfirmValidation = passwordConfirmValidation)
             }
         } else {
-            _state.update {
-                val passwordConfirmValidation = it.passwordConfirmValidation.copy(
+            updateState { state ->
+                val passwordConfirmValidation = state.passwordConfirmValidation.copy(
                     isValid = true,
                     errorMessageId = null
                 )
-                it.copy(passwordConfirmValidation = passwordConfirmValidation)
+                state.copy(passwordConfirmValidation = passwordConfirmValidation)
             }
         }
     }
